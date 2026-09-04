@@ -63,6 +63,24 @@ directory. Committed fixtures must be synthetic or demonstrably anonymized.
 Each fixture should have a reviewed expected-output file beside it once parser
 work begins.
 
+## Branch names
+
+Create a branch for your change and open a pull request targeting `main`.
+Use `<type>/<short-kebab-case-description>`, with a lowercase description and
+hyphens between words.
+
+| Prefix      | Purpose                              | Example                        |
+| ----------- | ------------------------------------ | ------------------------------ |
+| `feat/`     | New functionality                    | `feat/historical-reports`      |
+| `fix/`      | Bug fixes                            | `fix/capital-decimal-parsing`  |
+| `perf/`     | Performance improvements             | `perf/parser-text-reuse`       |
+| `docs/`     | Documentation changes                | `docs/contributor-guide`       |
+| `chore/`    | Dependency, tooling, and maintenance | `chore/update-dependencies`    |
+| `refactor/` | Code restructuring                   | `refactor/section-recognition` |
+
+Choose the prefix that describes the main purpose of the change. Branch names
+describe the work; the changeset determines the version bump.
+
 ## Pull requests
 
 Keep parsing changes tied to fixtures. A new document layout should arrive with
