@@ -38,7 +38,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "changeset": "changeset",
-    "check": "bun run lint && bun run format:check && bun run typecheck && bun run test && bun run build && bun run package:check",
+    "check": "bun run build && bun run lint && bun run format:check && bun run typecheck && bun run test && bun run package:check",
     "corpus:check": "bun run scripts/check-corpus.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -57,6 +57,7 @@
     "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^3.0.1",
     "@eslint/js": "^10.0.1",
+    "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^5.0.0",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
