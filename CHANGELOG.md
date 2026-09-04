@@ -1,0 +1,38 @@
+# visura-parser
+
+## 1.0.0
+
+### Major Changes
+
+- ea129af: Migrate parser results to the documented camelCase output schema. Replace flat
+  strings and translated role arrays with typed activity, capital, employee,
+  summary, document, officer, and shareholder records. Consumers must update
+  property accesses; the previous output contract is no longer returned.
+
+  Parse Italian counts and monetary values into numbers, explicit availability
+  into booleans, and reference dates into ISO dates. Preserve Italian role names,
+  separate sole proprietors from shareholders, keep representatives tied to the
+  cover, and read structured ATECO/ATECORI classifications and ownership details.
+
+### Minor Changes
+
+- ea129af: Add a deterministic text-based PDF parser with the INDA Visura output schema,
+  typed input errors, ISO date handling, positioned field extraction, and a
+  privacy-safe reference corpus verifier.
+
+### Patch Changes
+
+- ea129af: Read ShareCapitalInEuro only from the dedicated euro capital table. Correctly
+  associate Deliberato, Sottoscritto, and Versato with amounts across the page
+  midpoint, and prevent shareholder quota payments from filling capital fields.
+- ea129af: Recognize proprietor and feminine partner roles in evasion reports, keep legal
+  forms separate from representative names, and read activity descriptions and
+  start dates from the report body. Restrict people extraction to the relevant
+  sections and preserve names, quotas, and roles across page breaks without
+  turning statutory prose, wrapped role labels, or qualifications into people.
+  Keep quota amounts above the next ownership heading from overwriting the
+  previous shareholder's nominal value.
+- ea129af: Correct evasion report extraction for wrapped company names, legal forms,
+  inline company dates, and activity status. Keep shareholder rights, nominal
+  amounts, tax codes, and sole-shareholder roles attached to the correct person.
+  Exclude role annotations and protocol filing details from current records.
