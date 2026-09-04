@@ -1,6 +1,6 @@
 {
   "name": "visura-parser",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Deterministic parsing of text-based Italian Visura camerale PDFs",
   "keywords": [
     "camera-di-commercio",
