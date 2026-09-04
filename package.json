@@ -1,6 +1,6 @@
 {
   "name": "visura-parser",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Deterministic parsing of text-based Italian Visura camerale PDFs",
   "keywords": [
     "camera-di-commercio",
@@ -35,12 +35,15 @@
     "build": "tsc -p tsconfig.build.json",
     "changeset": "changeset",
     "check": "bun run lint && bun run format:check && bun run typecheck && bun run test && bun run build && bun run package:check",
+    "corpus:check": "bun run scripts/check-corpus.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "package:check": "publint && attw --pack . --profile esm-only",
+    "parse": "bun run scripts/parse.ts",
     "prepublishOnly": "bun run check",
     "release": "changeset publish",
+    "runtime:check": "node scripts/check-node-runtime.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
@@ -51,11 +54,16 @@
     "@changesets/cli": "^3.0.1",
     "@eslint/js": "^10.0.1",
     "@vitest/coverage-v8": "^5.0.0",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
     "eslint": "^10.9.1",
     "prettier": "^3.9.6",
     "publint": "^0.3.24",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.69.0",
     "vitest": "^5.0.0"
+  },
+  "dependencies": {
+    "pdfjs-dist": "4.10.38"
   }
 }

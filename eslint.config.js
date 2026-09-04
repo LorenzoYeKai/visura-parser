@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['coverage/', 'dist/'],
+    ignores: ['.cache/', 'coverage/', 'dist/'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -11,7 +11,10 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['eslint.config.js'],
+          allowDefaultProject: [
+            'eslint.config.js',
+            'scripts/check-node-runtime.mjs',
+          ],
         },
         tsconfigRootDir: import.meta.dirname,
       },

@@ -1,0 +1,443 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ItalianBusinessRegistryReport",
+  "description": "Structured data extracted from an Italian Chamber of Commerce business registry report (visura camerale). Property names are normalized in English, while official registry values and source terminology are preserved in Italian where appropriate.",
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "filename": {
+      "type": "string",
+      "description": "Name of the source document."
+    },
+
+    "reportType": {
+      "type": "string",
+      "description": "Official type of business registry report as stated in the source document, e.g. 'Visura Ordinaria', 'Visura Storica' or 'Visura di Evasione'."
+    },
+
+    "companyName": {
+      "type": "string",
+      "description": "Registered legal name or business name of the entity."
+    },
+
+    "registeredOfficeAddress": {
+      "type": "string",
+      "description": "Registered office address as reported in the business registry."
+    },
+
+    "certifiedEmail": {
+      "type": "string",
+      "description": "Registered certified electronic mail address (PEC) of the entity."
+    },
+
+    "reaNumber": {
+      "type": "string",
+      "description": "REA registration number assigned by the competent Chamber of Commerce."
+    },
+
+    "taxCode": {
+      "type": "string",
+      "description": "Italian tax identification code (codice fiscale) of the entity."
+    },
+
+    "vatNumber": {
+      "type": "string",
+      "description": "Italian VAT identification number (partita IVA) of the entity."
+    },
+
+    "leiCode": {
+      "type": "string",
+      "description": "Legal Entity Identifier (LEI), when available."
+    },
+
+    "legalForm": {
+      "type": "string",
+      "description": "Official legal form as reported in the source document, e.g. 'SOCIETA' A RESPONSABILITA' LIMITATA'."
+    },
+
+    "incorporationDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the deed of incorporation or establishment of the entity."
+    },
+
+    "registrationDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Date on which the entity was registered with the Italian Business Register (Registro delle Imprese)."
+    },
+
+    "lastProtocolDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the most recent protocol or filing recorded in the Business Register."
+    },
+
+    "primaryRepresentative": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Primary representative or senior officer displayed in the report summary, when present.",
+
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the person as reported in the source document."
+        },
+
+        "role": {
+          "type": "string",
+          "description": "Official role as reported in the source document, e.g. 'PRESIDENTE CONSIGLIO AMMINISTRAZIONE', 'AMMINISTRATORE UNICO' or 'AMMINISTRATORE DELEGATO'."
+        }
+      }
+    },
+
+    "activity": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Information about the entity's registered business activities.",
+
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Official activity status as reported by the Business Register, e.g. 'ATTIVA', 'INATTIVA', 'SOSPESA' or 'CESSATA'."
+        },
+
+        "startDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date on which the registered business activity started."
+        },
+
+        "primaryActivity": {
+          "type": "string",
+          "description": "Official description of the primary or prevailing business activity as reported in the source document."
+        },
+
+        "atecoCode": {
+          "type": "string",
+          "description": "Primary Italian ATECO classification code associated with the registered activity."
+        },
+
+        "naceCode": {
+          "type": "string",
+          "description": "European NACE classification code associated with the registered activity, when reported."
+        },
+
+        "atecoClassifications": {
+          "type": "array",
+          "description": "ATECO or ATECORI classifications reported for the entity.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "ATECO or ATECORI classification code."
+              },
+
+              "description": {
+                "type": "string",
+                "description": "Official activity description associated with the classification code."
+              },
+
+              "importance": {
+                "type": "string",
+                "description": "Official classification qualifier as reported in the source document, when available, e.g. 'prevalente' or 'primaria'."
+              }
+            }
+          }
+        },
+
+        "importExportActivity": {
+          "type": "string",
+          "description": "Official information concerning import or export activity as reported in the source document."
+        },
+
+        "networkContract": {
+          "type": "string",
+          "description": "Official information concerning participation in a business network agreement (contratto di rete)."
+        },
+
+        "licensesAndRegistrations": {
+          "type": "array",
+          "description": "Professional registers, rolls, licences, authorisations or similar registrations reported for the entity.",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "environmentalRegistrations": {
+          "type": "array",
+          "description": "Environmental registers or environmental professional rolls in which the entity is registered.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "shareCapital": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Registered share capital information.",
+
+      "properties": {
+        "currency": {
+          "type": "string",
+          "description": "Currency used for share capital amounts, usually 'EUR'."
+        },
+
+        "authorized": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Share capital formally resolved or approved by the shareholders (capitale deliberato)."
+        },
+
+        "subscribed": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Share capital formally subscribed by shareholders or members (capitale sottoscritto)."
+        },
+
+        "paidUp": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Subscribed share capital that has actually been paid or contributed (capitale versato)."
+        }
+      }
+    },
+
+    "employees": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Employee information reported in the business registry.",
+
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of employees or workers reported for the entity."
+        },
+
+        "referenceDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Reference date associated with the employee count."
+        }
+      }
+    },
+
+    "companySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Summary figures typically reported in the 'L'impresa in cifre' section.",
+
+      "properties": {
+        "shareholdersCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of shareholders or members reported for the entity."
+        },
+
+        "directorsCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of directors or administrators reported for the entity."
+        },
+
+        "officeHoldersCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of persons holding registered corporate offices or appointments."
+        },
+
+        "localUnitsCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of registered local business units."
+        },
+
+        "filingsLast12Months": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of filings submitted to the Business Register during the previous twelve months."
+        },
+
+        "shareTransfersCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of registered transfers of shares or ownership interests."
+        },
+
+        "registeredOfficeTransfersCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of registered transfers of the entity's registered office."
+        },
+
+        "hasEquityInterests": {
+          "type": "boolean",
+          "description": "Whether the entity is reported as holding equity interests or participations in other entities."
+        }
+      }
+    },
+
+    "businessRegisterFilings": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Summary of filings recorded in the Italian Business Register.",
+
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of Business Register filings reported for the indicated period."
+        },
+
+        "sinceDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Start date of the period used for the reported filing count, when specified."
+        }
+      }
+    },
+
+    "certifications": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Qualifications and certifications reported for the entity.",
+
+      "properties": {
+        "soa": {
+          "type": "array",
+          "description": "SOA qualifications or certifications reported for the entity.",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "quality": {
+          "type": "array",
+          "description": "Quality-related certifications reported for the entity.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "availableDocuments": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Documents reported as available for consultation from the Business Register.",
+
+      "properties": {
+        "companyFileAvailable": {
+          "type": "boolean",
+          "description": "Whether the company registry file (fascicolo) is available for consultation."
+        },
+
+        "articlesOfAssociationAvailable": {
+          "type": "boolean",
+          "description": "Whether the current articles of association or statute (statuto) are available for consultation."
+        },
+
+        "otherActsCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of other registered corporate acts available for consultation."
+        },
+
+        "financialStatementYears": {
+          "type": "array",
+          "description": "Financial years for which filed annual financial statements are available.",
+          "items": {
+            "type": "integer",
+            "minimum": 1900,
+            "maximum": 2200
+          }
+        }
+      }
+    },
+
+    "officers": {
+      "type": "array",
+      "description": "Persons holding registered corporate offices, governance roles or control functions.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the person as reported in the source document."
+          },
+
+          "taxCode": {
+            "type": "string",
+            "description": "Italian tax identification code of the person, when reported."
+          },
+
+          "roles": {
+            "type": "array",
+            "description": "Official corporate roles held by the person, preserved as reported in the source document.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+
+    "shareholders": {
+      "type": "array",
+      "description": "Persons or entities holding shares, quotas or membership interests in the entity.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name or registered name of the shareholder or member."
+          },
+
+          "taxCode": {
+            "type": "string",
+            "description": "Italian tax identification code of the shareholder or member, when reported."
+          },
+
+          "rightType": {
+            "type": "string",
+            "description": "Official type of right over the shares or ownership interest as reported in the source document, e.g. 'PROPRIETA'', 'USUFRUTTO' or 'NUDA PROPRIETA''."
+          },
+
+          "nominalValue": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Nominal value of the shares, quotas or ownership interest held."
+          },
+
+          "currency": {
+            "type": "string",
+            "description": "Currency used for the nominal value, usually 'EUR'."
+          },
+
+          "ownershipPercentage": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Percentage of the entity's share capital or ownership interest represented by the holding, when determinable."
+          },
+
+          "isSoleShareholder": {
+            "type": "boolean",
+            "description": "Whether the person or entity is identified as the sole shareholder or sole member."
+          }
+        }
+      }
+    }
+  }
+}

@@ -11,3 +11,4 @@ coverage/
 
 # Real Visure may contain personal data. Keep local samples out of Git.
 test/fixtures/private/
+corpus-output/

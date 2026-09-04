@@ -1,0 +1,203 @@
+{
+  "filename": "visura_ordinaria_acme_software_srl.pdf",
+
+  "reportType": "Visura Ordinaria",
+
+  "companyName": "ACME SOFTWARE S.R.L.",
+
+  "registeredOfficeAddress": "VIA GIUSEPPE GARIBALDI 42, 20121 MILANO (MI)",
+
+  "certifiedEmail": "acmesoftware@pec.it",
+
+  "reaNumber": "MI-2684512",
+
+  "taxCode": "11876540967",
+
+  "vatNumber": "11876540967",
+
+  "leiCode": "815600A1B2C3D4E5F678",
+
+  "legalForm": "SOCIETA' A RESPONSABILITA' LIMITATA",
+
+  "incorporationDate": "2021-03-18",
+
+  "registrationDate": "2021-03-24",
+
+  "lastProtocolDate": "2025-07-15",
+
+  "primaryRepresentative": {
+    "name": "MARIO ROSSI",
+    "role": "PRESIDENTE CONSIGLIO AMMINISTRAZIONE"
+  },
+
+  "activity": {
+    "status": "ATTIVA",
+
+    "startDate": "2021-04-01",
+
+    "primaryActivity": "PRODUZIONE DI SOFTWARE NON CONNESSO ALL'EDIZIONE, CONSULENZA INFORMATICA E SVILUPPO DI SOLUZIONI SOFTWARE PER IMPRESE",
+
+    "atecoCode": "62.01.00",
+
+    "naceCode": "62.01",
+
+    "atecoClassifications": [
+      {
+        "code": "62.01.00",
+        "description": "PRODUZIONE DI SOFTWARE NON CONNESSO ALL'EDIZIONE",
+        "importance": "PREVALENTE"
+      },
+      {
+        "code": "62.02.00",
+        "description": "CONSULENZA NEL SETTORE DELLE TECNOLOGIE DELL'INFORMATICA",
+        "importance": "SECONDARIA"
+      }
+    ],
+
+    "importExportActivity": "NON RISULTA ESERCITATA",
+
+    "networkContract": "NESSUN CONTRATTO DI RETE REGISTRATO",
+
+    "licensesAndRegistrations": [
+      "ISCRIZIONE AL REGISTRO DELLE IMPRESE",
+      "ISCRIZIONE NELLA SEZIONE ORDINARIA DAL 24/03/2021"
+    ],
+
+    "environmentalRegistrations": []
+  },
+
+  "shareCapital": {
+    "currency": "EUR",
+
+    "authorized": 50000.0,
+
+    "subscribed": 50000.0,
+
+    "paidUp": 50000.0
+  },
+
+  "employees": {
+    "count": 18,
+    "referenceDate": "2025-12-31"
+  },
+
+  "companySummary": {
+    "shareholdersCount": 3,
+
+    "directorsCount": 3,
+
+    "officeHoldersCount": 6,
+
+    "localUnitsCount": 1,
+
+    "filingsLast12Months": 7,
+
+    "shareTransfersCount": 2,
+
+    "registeredOfficeTransfersCount": 1,
+
+    "hasEquityInterests": true
+  },
+
+  "businessRegisterFilings": {
+    "count": 24,
+    "sinceDate": "2021-03-24"
+  },
+
+  "certifications": {
+    "soa": [],
+
+    "quality": ["UNI EN ISO 9001:2015"]
+  },
+
+  "availableDocuments": {
+    "companyFileAvailable": true,
+
+    "articlesOfAssociationAvailable": true,
+
+    "otherActsCount": 19,
+
+    "financialStatementYears": [2024, 2023, 2022, 2021]
+  },
+
+  "officers": [
+    {
+      "name": "MARIO ROSSI",
+      "taxCode": "RSSMRA80A01F205X",
+      "roles": [
+        "PRESIDENTE CONSIGLIO AMMINISTRAZIONE",
+        "AMMINISTRATORE DELEGATO"
+      ]
+    },
+    {
+      "name": "LUCA BIANCHI",
+      "taxCode": "BNCLCU85C12F205Y",
+      "roles": ["CONSIGLIERE"]
+    },
+    {
+      "name": "ANNA VERDI",
+      "taxCode": "VRDNNA82E55F205Z",
+      "roles": ["CONSIGLIERE"]
+    },
+    {
+      "name": "PAOLO NERI",
+      "taxCode": "NREPLA73D04F205W",
+      "roles": ["PRESIDENTE DEL COLLEGIO SINDACALE"]
+    },
+    {
+      "name": "GIULIA FERRARI",
+      "taxCode": "FRRGLI76A41F205V",
+      "roles": ["SINDACO"]
+    },
+    {
+      "name": "ANDREA ROMANO",
+      "taxCode": "RMNNDR79H19F205U",
+      "roles": ["SINDACO SUPPLENTE"]
+    }
+  ],
+
+  "shareholders": [
+    {
+      "name": "MARIO ROSSI",
+      "taxCode": "RSSMRA80A01F205X",
+
+      "rightType": "PROPRIETA'",
+
+      "nominalValue": 25000.0,
+
+      "currency": "EUR",
+
+      "ownershipPercentage": 50.0,
+
+      "isSoleShareholder": false
+    },
+    {
+      "name": "LUCA BIANCHI",
+      "taxCode": "BNCLCU85C12F205Y",
+
+      "rightType": "PROPRIETA'",
+
+      "nominalValue": 15000.0,
+
+      "currency": "EUR",
+
+      "ownershipPercentage": 30.0,
+
+      "isSoleShareholder": false
+    },
+    {
+      "name": "ALPHA HOLDING S.R.L.",
+      "taxCode": "10987650961",
+
+      "rightType": "PROPRIETA'",
+
+      "nominalValue": 10000.0,
+
+      "currency": "EUR",
+
+      "ownershipPercentage": 20.0,
+
+      "isSoleShareholder": false
+    }
+  ]
+}
