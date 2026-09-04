@@ -15,6 +15,15 @@ interface FieldSpec {
   readonly multiline?: boolean;
 }
 
+type SpansForPage = (page: ExtractedPage) => readonly PositionedSpan[];
+
+interface PreparedPage {
+  readonly spans: readonly PositionedSpan[];
+  readonly labels: readonly { span: PositionedSpan; text: string }[];
+}
+
+type PreparePage = (page: ExtractedPage) => PreparedPage;
+
 const FIELD_SPECS = [
   {
     key: 'registeredOfficeAddress',
@@ -157,14 +166,14 @@ const DATE_FIELDS: ReadonlySet<ScalarKey> = new Set([
 ]);
 
 function matchesAny(text: string, patterns: readonly RegExp[]): boolean {
-  const normalized = normalizeText(text);
-  return patterns.some((pattern) => pattern.test(normalized));
+  return patterns.some((pattern) => pattern.test(text));
 }
 
 function isKnownLabel(text: string): boolean {
+  const normalized = normalizeText(text);
   return (
-    isPersonRole(text) ||
-    ALL_LABELS.some((pattern) => pattern.test(normalizeText(text)))
+    isPersonRole(normalized) ||
+    ALL_LABELS.some((pattern) => pattern.test(normalized))
   );
 }
 
@@ -178,12 +187,11 @@ function samePanel(
 }
 
 function inlineValue(
-  label: PositionedSpan,
+  text: string,
   patterns: readonly RegExp[],
 ): string | undefined {
-  const text = normalizeText(label.text);
   const separator = text.indexOf(':');
-  if (separator < 0 || !matchesAny(text.slice(0, separator), patterns))
+  if (separator < 0 || !matchesAny(text.slice(0, separator).trim(), patterns))
     return undefined;
   const value = normalizeText(text.slice(separator + 1));
   if (value.length > 0) return value;
@@ -192,18 +200,18 @@ function inlineValue(
 
 function findValueOnPage(
   page: ExtractedPage,
+  prepared: PreparedPage,
   patterns: readonly RegExp[],
   multiline = false,
   fullWidth = false,
 ): string | undefined {
-  const labels = semanticSpans(page).filter(
-    (span) =>
-      matchesAny(span.text, patterns) ||
-      inlineValue(span, patterns) !== undefined,
+  const labels = prepared.labels.filter(
+    ({ text }) =>
+      matchesAny(text, patterns) || inlineValue(text, patterns) !== undefined,
   );
 
-  for (const label of labels) {
-    const inline = inlineValue(label, patterns);
+  for (const { span: label, text } of labels) {
+    const inline = inlineValue(text, patterns);
     if (inline !== undefined) return inline;
 
     const candidates = page.spans
@@ -239,7 +247,7 @@ function findValueOnPage(
 
     if (!multiline) return normalizeText(value.text);
 
-    const nextLabel = semanticSpans(page)
+    const nextLabel = prepared.spans
       .filter(
         (span) =>
           (fullWidth || samePanel(page, value, span)) &&
@@ -291,8 +299,10 @@ function findCoverPage(pdf: ExtractedPdf): ExtractedPage {
   );
 }
 
-function findBusinessName(page: ExtractedPage): string | undefined {
-  const spans = semanticSpans(page);
+function findBusinessName(
+  page: ExtractedPage,
+  spans: readonly PositionedSpan[],
+): string | undefined {
   const title = spans
     .filter(
       (span) =>
@@ -338,19 +348,23 @@ function findBusinessName(page: ExtractedPage): string | undefined {
   return parts.join(' ');
 }
 
-function findBusinessNameFromLabels(pdf: ExtractedPdf): string | undefined {
+function findBusinessNameFromLabels(
+  pdf: ExtractedPdf,
+  prepare: PreparePage,
+): string | undefined {
   const labels = [/^denominazione$/i, /^ditta$/i, /^ragione sociale$/i];
   for (const page of pdf.pages) {
-    const value = findValueOnPage(page, labels, true);
+    const value = findValueOnPage(page, prepare(page), labels, true);
     if (value !== undefined) return value;
   }
   return undefined;
 }
 
-function detectVisuraType(cover: ExtractedPage): string | undefined {
-  const titles = semanticSpans(cover).filter(
-    (span) => span.y > cover.height * 0.35,
-  );
+function detectVisuraType(
+  cover: ExtractedPage,
+  spans: readonly PositionedSpan[],
+): string | undefined {
+  const titles = spans.filter((span) => span.y > cover.height * 0.35);
   const title = titles.find((span) =>
     /^visura\s+(?:ordinaria|storica|(?:di\s+)?evasione)\b/i.test(
       normalizeText(span.text),
@@ -374,10 +388,14 @@ export function isSupportedVisuraBlock(pdf: ExtractedPdf): boolean {
   );
 }
 
-function beforeSection(pdf: ExtractedPdf, heading: RegExp): ExtractedPdf {
+function beforeSection(
+  pdf: ExtractedPdf,
+  heading: RegExp,
+  spansFor: SpansForPage,
+): ExtractedPdf {
   const pages: ExtractedPage[] = [];
   for (const page of pdf.pages) {
-    const boundary = semanticSpans(page)
+    const boundary = spansFor(page)
       .filter(
         (span) =>
           span.x < page.width * 0.15 && heading.test(normalizeText(span.text)),
@@ -400,16 +418,37 @@ export function parseExtractedDocument(
   pdf: ExtractedPdf,
   filename?: string,
 ): VisuraDocument {
+  // Reuse phrase reconstruction across fields within this call only. Key by
+  // object identity: section-clipped pages can share a source page number.
+  const prepared = new Map<ExtractedPage, PreparedPage>();
+  const prepare: PreparePage = (page) => {
+    let text = prepared.get(page);
+    if (text === undefined) {
+      const spans = semanticSpans(page);
+      text = {
+        spans,
+        labels: spans.map((span) => ({
+          span,
+          text: normalizeText(span.text),
+        })),
+      };
+      prepared.set(page, text);
+    }
+    return text;
+  };
+  const spansFor: SpansForPage = (page) => prepare(page).spans;
   const cover = findCoverPage(pdf);
   const currentPdf = beforeSection(
     pdf,
     /^(?:\d+\s+)?(?:storia (?:delle|dei|di)|informazioni storiche|protocollo evaso\b)/i,
+    spansFor,
   );
   // Company dates precede the domain sections; later registration dates can
   // belong to a shareholder or an appointment rather than the company.
   const identityPdf = beforeSection(
     currentPdf,
     /^\d+\s+(?:capitale|soci|amministratori|sindaci|titolari|attivit[aà]'?|trasferimenti|scioglimento|altre cariche)\b/i,
+    spansFor,
   );
   const fields: Partial<Record<ScalarKey, string>> = {};
   const activityBody = joinPages(
@@ -428,6 +467,7 @@ export function parseExtractedDocument(
     for (const page of pages) {
       const value = findValueOnPage(
         page,
+        prepare(page),
         field.labels,
         field.multiline,
         page === activityBody,
@@ -442,14 +482,15 @@ export function parseExtractedDocument(
   }
   const result = mapDocument(fields);
   if (filename !== undefined) result.filename = filename;
-  const reportType = detectVisuraType(cover);
+  const reportType = detectVisuraType(cover, spansFor(cover));
   if (reportType !== undefined) result.reportType = reportType;
   const name =
-    findBusinessName(cover) ?? findBusinessNameFromLabels(currentPdf);
+    findBusinessName(cover, spansFor(cover)) ??
+    findBusinessNameFromLabels(currentPdf, prepare);
   if (name !== undefined) result.companyName = normalizeText(name);
 
   // Dates belong to their printed summary label, not the report extraction date.
-  for (const label of semanticSpans(cover)) {
+  for (const label of spansFor(cover)) {
     const text = normalizeText(label.text);
     const employees = /^addetti(?: al)?\s*\(?(\d{2}\/\d{2}\/\d{4})\)?$/i.exec(
       text,

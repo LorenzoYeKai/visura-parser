@@ -42,9 +42,11 @@ interface Identity {
   y: number;
 }
 
-function identities(page: ExtractedPage): Identity[] {
+function identities(
+  page: ExtractedPage,
+  spans: readonly PositionedSpan[],
+): Identity[] {
   const result: Identity[] = [];
-  const spans = semanticSpans(page);
   for (const span of spans) {
     const match = TAX_CODE.exec(normalizeText(span.text));
     if (!match?.[1]) continue;
@@ -161,7 +163,7 @@ export function parsePeople(
   } = { officers: [], shareholders: [] };
   const page = joinPages(pdf.pages);
   const spans = semanticSpans(page);
-  const records = identities(page);
+  const records = identities(page, spans);
   const sections = spans
     .filter(
       (span) =>

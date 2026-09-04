@@ -22,6 +22,74 @@ function span(
 }
 
 describe('parseExtractedDocument', () => {
+  it('keeps clipped sections distinct from the cover with the same page number', () => {
+    const pdf: ExtractedPdf = {
+      pages: [
+        {
+          number: 1,
+          width: 595,
+          height: 842,
+          spans: [
+            span('VISURA ORDINARIA', 80, 780),
+            span('IMPRESA SINTETICA S.R.L.', 80, 750),
+            span('Numero REA: RM - 1234567', 312, 520),
+            span('4 Amministratori', 32, 400),
+            span('Data iscrizione: 01/02/2020', 200, 370),
+            span('6 Storia delle modifiche', 32, 300),
+            span('Partita IVA: 12345678901', 200, 270),
+          ],
+        },
+      ],
+    };
+    const result = parseExtractedDocument(pdf);
+    expect(result.reaNumber).toBe('RM - 1234567');
+    expect(result.registrationDate).toBeUndefined();
+    expect(result.vatNumber).toBeUndefined();
+  });
+
+  it('normalizes split and inline labels without changing their value boundaries', () => {
+    const pdf: ExtractedPdf = {
+      pages: [
+        {
+          number: 1,
+          width: 595,
+          height: 842,
+          spans: [
+            span('VISURA ORDINARIA', 80, 780),
+            span('IMPRESA SINTETICA S.R.L.', 80, 750),
+            span('Ｎｕｍｅｒｏ\u00a0ＲＥＡ  :  RM - 1234567', 312, 520),
+            span('Forma', 312, 500, 28),
+            span('giuridica', 343, 500, 45),
+            span('SOCIETA\u2019 A RESPONSABILITA\u2019 LIMITATA', 437, 500),
+          ],
+        },
+      ],
+    };
+    expect(parseExtractedDocument(pdf)).toMatchObject({
+      reaNumber: 'RM - 1234567',
+      legalForm: "SOCIETA' A RESPONSABILITA' LIMITATA",
+    });
+  });
+
+  it('keeps prepared text local to each parse and leaves source spans intact', () => {
+    const spans = [
+      span('VISURA ORDINARIA', 80, 780),
+      span('IMPRESA SINTETICA S.R.L.', 80, 750),
+      span('Numero REA', 312, 520),
+      span('RM - 1234567', 437, 520),
+    ];
+    const pdf: ExtractedPdf = {
+      pages: [{ number: 1, width: 595, height: 842, spans }],
+    };
+    const original = structuredClone(pdf);
+    const first = parseExtractedDocument(pdf);
+    expect(first.reaNumber).toBe('RM - 1234567');
+    expect(pdf).toEqual(original);
+    spans[3] = span('MI - 7654321', 437, 520);
+    expect(parseExtractedDocument(pdf).reaNumber).toBe('MI - 7654321');
+    expect(first.reaNumber).toBe('RM - 1234567');
+  });
+
   it('reads separate capital cells across the page midpoint', () => {
     const pdf: ExtractedPdf = {
       pages: [

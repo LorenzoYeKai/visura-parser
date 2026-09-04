@@ -5,6 +5,33 @@ _visure camerali_. The public contract is now the documented schema in
 `outputSchema.json`. The pipeline sections also describe the direction for
 deeper evidence and section handling beyond the initial implementation.
 
+## Implemented pipeline and roadmap
+
+The implementation currently lives in these modules:
+
+| Stage                                              | Module                                                                         |
+| -------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Byte limits, PDF.js extraction, typed input errors | `src/internal/extract-pdf.ts`                                                  |
+| Text normalization and reconstructed phrases       | `src/internal/text.ts`                                                         |
+| Continuations across pages                         | `src/internal/join-pages.ts`                                                   |
+| Recognition, section boundaries, scalar fields     | `src/internal/parse-document.ts`                                               |
+| People, classifications, and capital               | `src/internal/parse-people.ts`, `parse-classifications.ts`, `parse-capital.ts` |
+| Scalar public schema mapping                       | `src/internal/map-document.ts`                                                 |
+| Public operation and final recognition checks      | `src/parse-visura.ts`                                                          |
+
+The later sections describe both constraints and planned capabilities. The
+current implementation does not yet have a general section graph, per-field
+evidence index, cross-field conflict diagnostics, or observable unknown
+sections. Extraction retains trimmed span text and geometry; normalization uses
+NFKC. It does not yet retain every raw PDF text item described in the roadmap.
+The strict public schema cannot expose unknown sections or diagnostics without
+an API decision. Do not assume those features already exist when contributing.
+
+Scalar field parsing prepares semantic phrases and normalized labels once per
+page object within a parse. Section-clipped pages remain distinct objects even
+when they have the same source page number. Prepared data is discarded after
+the call; no document data is cached globally.
+
 The design is based on three inputs:
 
 - the local corpus at `/Users/lorenzo/Documents/CP/visure-examples`;
