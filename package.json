@@ -11,6 +11,10 @@
     "visura-camerale"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LorenzoYeKai/visura-parser.git"
+  },
   "type": "module",
   "sideEffects": false,
   "files": [

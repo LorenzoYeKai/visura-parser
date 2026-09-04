@@ -11,6 +11,9 @@ bun run check
 
 Use `bun run changeset` for a change that affects the published package.
 
+Maintainers can follow the [release guide](docs/releasing.md) to configure npm
+trusted publishing and review automated releases.
+
 ## Fixture policy
 
 Italian Chamber of Commerce records can include names, addresses, identifiers,
