@@ -14,6 +14,7 @@ export default tseslint.config(
           allowDefaultProject: [
             'eslint.config.js',
             'scripts/check-node-runtime.mjs',
+            'scripts/benchmark.mjs',
           ],
         },
         tsconfigRootDir: import.meta.dirname,

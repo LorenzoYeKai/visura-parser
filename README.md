@@ -10,14 +10,19 @@ be text based.
 
 ## Motivation
 
-When working with Italian companies, you may need to obtain structured data about them. And yet ther isn't really a free and reliable solution to do that.
-This is what happened at Silkware, where we work with and onboard Italian companies on a daily basis.
-The _Visura camerale_ is an official document that contains a satisfying amount of information about a company that is easy to obtain and to share for companies.
-Currently, there isn't a free and open source solution to extract this information in a structured way.
+When working with Italian companies, you often need structured data about them.
+We wanted an open source parser that we could inspect, test, and improve.
+
+This came up at Silkware, where we work with and onboard Italian companies. The
+_Visura camerale_ is easy for companies to obtain and share, and it contains
+enough official registry data to make structured extraction useful.
 
 ## Disclaimer
 
-This the development of this library is strongly aided by AI coding agents such as GPT5.6.
+This library is developed with substantial help from AI coding agents.
+Contributions must meet the same fixture, correctness, and review requirements
+regardless of how the code was written.
+The parser should be treated as a best-effort tool, so it may fail for Visure layouts that are not in the private corpus. Feel free to open an issue if you encounter a layout that is not supported, or contribute yourself.
 
 ## Requirements
 
@@ -25,6 +30,12 @@ This the development of this library is strongly aided by AI coding agents such 
 - [Bun](https://bun.sh/) 1.3.12 for contributors
 
 ## Usage
+
+Install the ESM package in your application:
+
+```sh
+npm install visura-parser
+```
 
 ```ts
 import { readFile } from 'node:fs/promises';
@@ -50,7 +61,7 @@ Missing fields are omitted. Counts and monetary amounts are numbers; explicit
 availability values are booleans. Dates use ISO `YYYY-MM-DD`. Official Italian
 role names are preserved in structured officer and shareholder records.
 See the [example output](exampleOutput.json) and
-[the schema](outputSchema.md).
+[the schema](outputSchema.json).
 
 Ordinary, historical, evasion reports, and the supported shareholder Visura
 block are recognized. A block has no `reportType`. Image-only PDFs,
@@ -105,8 +116,20 @@ These files can contain personal data, just like the source PDFs.
 
 ## Contributing
 
-Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before adding fixtures. Real Visure
+Read [the contributor guide](https://github.com/LorenzoYeKai/visura-parser/blob/main/CONTRIBUTING.md) before adding fixtures. Real Visure
 often contain personal data and must not be committed.
+
+The public tests and synthetic fixtures work without access to the private
+corpus. To measure the built package on Node.js:
+
+```sh
+bun run benchmark
+bun run benchmark -- /path/to/local/pdfs 3
+```
+
+The benchmark prints aggregate timings and result hashes, without filenames or
+document values. See [the performance review and audit](https://github.com/LorenzoYeKai/visura-parser/blob/main/docs/performance-review.md)
+for the measurement method, findings, and remaining work.
 
 ## License
 
