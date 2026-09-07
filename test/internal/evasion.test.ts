@@ -241,6 +241,9 @@ describe('evasion report layout', () => {
       name: 'ANNA VERDI',
       role: 'Socia Accomandataria',
     });
+    expect(result.officers).toEqual([
+      { name: 'ANNA VERDI', roles: ['Socia Accomandataria'] },
+    ]);
     expect(result.shareholders).toEqual([{ name: 'ANNA VERDI' }]);
   });
 

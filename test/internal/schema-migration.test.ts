@@ -115,6 +115,39 @@ describe('new schema semantics', () => {
     ]);
   });
 
+  it('treats a shareholder-administrator as an owner, officer, and cover representative', () => {
+    const result = parse([
+      span('Socio Amministratore', 312, 700, 100),
+      span('PERSONA ESEMPIO', 440, 700),
+      span("Rappresentante dell'impresa", 440, 680, 120),
+    ]);
+
+    expect(result.primaryRepresentative).toEqual({
+      name: 'PERSONA ESEMPIO',
+      role: 'Socio Amministratore',
+    });
+    expect(result.officers).toEqual([
+      { name: 'PERSONA ESEMPIO', roles: ['Socio Amministratore'] },
+    ]);
+    expect(result.shareholders).toEqual([{ name: 'PERSONA ESEMPIO' }]);
+  });
+
+  it('recognizes a female sole administrator as an officer and cover representative', () => {
+    const result = parse([
+      span('Amministratrice Unica', 312, 700, 100),
+      span('PERSONA ESEMPIO', 440, 700),
+    ]);
+
+    expect(result.primaryRepresentative).toEqual({
+      name: 'PERSONA ESEMPIO',
+      role: 'Amministratrice Unica',
+    });
+    expect(result.officers).toEqual([
+      { name: 'PERSONA ESEMPIO', roles: ['Amministratrice Unica'] },
+    ]);
+    expect(result.shareholders).toBeUndefined();
+  });
+
   it('keeps personal tax codes attached to names when birthplace cells are split', () => {
     const result = parse([
       span('Amministratore Unico', 25, 700, 110),

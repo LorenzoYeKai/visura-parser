@@ -5,9 +5,10 @@ import { parseItalianAmount } from './values.js';
 import { joinPages } from './join-pages.js';
 
 const OFFICER_ROLE =
-  /^(?:presidente(?: (?:del )?consiglio (?:di |d')?amministrazione| del collegio sindacale)?|vice ?presidente(?: (?:del )?consiglio (?:di |d')?amministrazione)?|amministratore(?: unico| delegato)?|consigliere(?: delegato)?|sindaco(?: effettivo| supplente)?|titolare(?: dell'impresa individuale| di impresa individuale| firmatari[oa])?|liquidatore|procuratore(?: speciale| generale)?)$/i;
-const SHAREHOLDER_ROLE =
-  /^(?:soci[oa](?: unic[oa]| accomandante| accomandatari[oa])?|(?:nuda )?propriet[aà]'?|usufrutto)$/i;
+  /^(?:presidente(?: (?:del )?consiglio (?:di |d')?amministrazione| del collegio sindacale)?|vice ?presidente(?: (?:del )?consiglio (?:di |d')?amministrazione)?|amministrat(?:ore|rice)(?: unic[oa]| delegat[oa])?|consigliere(?: delegato)?|sindaco(?: effettivo| supplente)?|titolare(?: dell'impresa individuale| di impresa individuale| firmatari[oa])?|liquidatore|procuratore(?: speciale| generale)?|legale rappresentante)$/i;
+const PARTNER_GOVERNANCE_ROLE =
+  /^soci[oa] (?:accomandatari[oa]|amministrat(?:ore|rice)|legale rappresentante)$/i;
+const SHAREHOLDER_ROLE = /^soci[oa](?: unic[oa]| accomandante)?$/i;
 const RIGHT = /^(?:(?:nuda )?propriet[aà]'?|usufrutto)$/i;
 const TAX_CODE = /^(?:codice fiscale\s*:?\s*)?([A-Z0-9]{16}|\d{11})$/i;
 const SECTION =
@@ -16,9 +17,28 @@ const PEOPLE_SECTION =
   /^\d+\s+(?:soci|amministratori|sindaci|titolari|altre cariche)\b/i;
 const OWNERSHIP_ROW_TOLERANCE = 5;
 
-export function isPersonRole(text: string): boolean {
+interface PersonRoleClassification {
+  readonly officer: boolean;
+  readonly shareholder: boolean;
+  readonly right: boolean;
+  readonly soleShareholder: boolean;
+}
+
+function classifyPersonRole(text: string): PersonRoleClassification {
   const value = normalizeText(text);
-  return OFFICER_ROLE.test(value) || SHAREHOLDER_ROLE.test(value);
+  const partnerGovernance = PARTNER_GOVERNANCE_ROLE.test(value);
+  const right = RIGHT.test(value);
+  return {
+    officer: OFFICER_ROLE.test(value) || partnerGovernance,
+    shareholder: SHAREHOLDER_ROLE.test(value) || partnerGovernance || right,
+    right,
+    soleShareholder: /^soci[oa] unic[oa]$/i.test(value),
+  };
+}
+
+export function isPersonRole(text: string): boolean {
+  const role = classifyPersonRole(text);
+  return role.officer || role.shareholder;
 }
 
 function isName(text: string): boolean {
@@ -31,8 +51,7 @@ function isName(text: string): boolean {
     !/^(?:elenco|numero|codice|nato|nata|residente|domicilio|residenza|indirizzo|\(?in carica|dal\s+\d|durata|quota|valore|tipo diritto|rappresentante|informazioni|amministratori|soci\b|sindaci|titolari|data |carica\b|poteri\b|registro|camera|visura|via\b|viale\b|piazza\b|cittadinanza|proprieta|versato|euro\b|capitale)/i.test(
       text,
     ) &&
-    !OFFICER_ROLE.test(text) &&
-    !SHAREHOLDER_ROLE.test(text)
+    !isPersonRole(text)
   );
 }
 
@@ -172,11 +191,7 @@ export function parsePeople(
     .sort((a, b) => a.y - b.y);
   // Longer reconstructed roles take precedence over a contained 'Presidente'.
   const roles = spans
-    .filter(
-      (span) =>
-        OFFICER_ROLE.test(normalizeText(span.text)) ||
-        SHAREHOLDER_ROLE.test(normalizeText(span.text)),
-    )
+    .filter((span) => isPersonRole(span.text))
     .filter((span) => {
       const section = sections.find((heading) => heading.y >= span.y);
       return (
@@ -193,8 +208,7 @@ export function parsePeople(
             Math.abs(other.y - span.y) <= 2 &&
             other.width > span.width &&
             other.x + other.width >= span.x + span.width &&
-            (OFFICER_ROLE.test(normalizeText(other.text)) ||
-              SHAREHOLDER_ROLE.test(normalizeText(other.text))),
+            isPersonRole(other.text),
         ),
     )
     .sort((a, b) => b.y - a.y || a.x - b.x);
@@ -212,6 +226,7 @@ export function parsePeople(
   );
   for (const role of roles) {
     const text = normalizeText(role.text);
+    const classification = classifyPersonRole(text);
     // A value beside 'carica' belongs to the preceding identity. The next
     // row can be another qualification, not a new person's name.
     const isDetailRole = page.spans.some(
@@ -254,7 +269,7 @@ export function parsePeople(
       name: fullName(page, name),
       ...(identity ? { taxCode: identity.taxCode } : {}),
     };
-    if (OFFICER_ROLE.test(text)) {
+    if (classification.officer) {
       mergeOfficer(result.officers, { ...person, roles: [text] });
       if (
         role.page === coverPage &&
@@ -267,11 +282,11 @@ export function parsePeople(
       ) {
         result.primaryRepresentative = { name: person.name, role: text };
       }
-    } else {
+    }
+    if (classification.shareholder) {
       const shareholder: Shareholder = { ...person };
-      if (RIGHT.test(text)) shareholder.rightType = text;
-      if (/^soci[oa] unic[oa]$/i.test(text))
-        shareholder.isSoleShareholder = true;
+      if (classification.right) shareholder.rightType = text;
+      if (classification.soleShareholder) shareholder.isSoleShareholder = true;
       if (
         role.page === coverPage &&
         adjacent !== undefined &&

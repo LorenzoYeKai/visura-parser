@@ -330,6 +330,7 @@ describe('output schema contract', () => {
       validate({ activity: { atecoClassifications: [{ extra: 'x' }] } }),
     ).toBe(false);
     expect(validate({ shareholders: [{ extra: 'not allowed' }] })).toBe(false);
+    expect(validate({ localUnits: [{ extra: 'not allowed' }] })).toBe(false);
     expect(validate({ registrationDate: '2024-02-29' })).toBe(true);
     expect(validate({ registrationDate: '29/02/2024' })).toBe(false);
     expect(validate({ shareCapital: { paidUp: -1 } })).toBe(false);

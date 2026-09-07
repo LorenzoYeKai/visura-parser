@@ -9,15 +9,15 @@ deeper evidence and section handling beyond the initial implementation.
 
 The implementation currently lives in these modules:
 
-| Stage                                              | Module                                                                         |
-| -------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Byte limits, PDF.js extraction, typed input errors | `src/internal/extract-pdf.ts`                                                  |
-| Text normalization and reconstructed phrases       | `src/internal/text.ts`                                                         |
-| Continuations across pages                         | `src/internal/join-pages.ts`                                                   |
-| Recognition, section boundaries, scalar fields     | `src/internal/parse-document.ts`                                               |
-| People, classifications, and capital               | `src/internal/parse-people.ts`, `parse-classifications.ts`, `parse-capital.ts` |
-| Scalar public schema mapping                       | `src/internal/map-document.ts`                                                 |
-| Public operation and final recognition checks      | `src/parse-visura.ts`                                                          |
+| Stage                                              | Module                                                                                                 |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Byte limits, PDF.js extraction, typed input errors | `src/internal/extract-pdf.ts`                                                                          |
+| Text normalization and reconstructed phrases       | `src/internal/text.ts`                                                                                 |
+| Continuations across pages                         | `src/internal/join-pages.ts`                                                                           |
+| Recognition, section boundaries, scalar fields     | `src/internal/parse-document.ts`                                                                       |
+| People, classifications, capital, and local units  | `src/internal/parse-people.ts`, `parse-classifications.ts`, `parse-capital.ts`, `parse-local-units.ts` |
+| Scalar public schema mapping                       | `src/internal/map-document.ts`                                                                         |
+| Public operation and final recognition checks      | `src/parse-visura.ts`                                                                                  |
 
 The later sections describe both constraints and planned capabilities. The
 current implementation does not yet have a general section graph, per-field
@@ -129,6 +129,7 @@ The implemented invariants are:
 - no network, clock, locale, randomness or process-global mutable state is
   consulted;
 - missing values are omitted; dashes remain only in string-valued fields;
+- current local units retain their printed order and are omitted when their detail block is absent;
 - dates use strict ISO calendar strings; counts and amounts are numbers,
   with explicit parsing of Italian punctuation and precision checks;
 - ordinary, historical, and evasion documents have `reportType`; a recognized

@@ -41,6 +41,10 @@ describe('parseVisura', () => {
       { text: 'MARIO ROSSI', x: 149, y: 240 },
       { text: "Proprieta'", x: 25, y: 200 },
       { text: 'ALFA HOLDING S.R.L.', x: 25, y: 184 },
+      { text: "7 Sedi secondarie ed unita' locali", x: 25, y: 160 },
+      { text: "Unita' Locale n. RM/1", x: 37, y: 140 },
+      { text: 'Data apertura: 05/12/2017', x: 202, y: 120 },
+      { text: 'Indirizzo: ROMA (RM) VIA PROVA 2 - 00100', x: 37, y: 100 },
     ]);
 
     const originalBytes = input.slice();
@@ -67,6 +71,13 @@ describe('parseVisura', () => {
         subscribed: 20000,
         paidUp: 10000,
       },
+      localUnits: [
+        {
+          number: 'RM/1',
+          address: 'ROMA (RM) VIA PROVA 2 - 00100',
+          openingDate: '2017-12-05',
+        },
+      ],
     });
   });
 
