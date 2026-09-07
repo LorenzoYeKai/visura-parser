@@ -12,6 +12,7 @@ export type {
   BusinessRegisterFilings,
   Certifications,
   AvailableDocuments,
+  LocalUnit,
   Officer,
   Shareholder,
   VisuraDocument,

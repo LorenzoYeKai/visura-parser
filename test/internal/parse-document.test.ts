@@ -337,6 +337,55 @@ describe('parseExtractedDocument', () => {
     ]);
   });
 
+  it('keeps local-unit facts separate from company-level activity', () => {
+    const pdf: ExtractedPdf = {
+      pages: [
+        {
+          number: 1,
+          width: 595,
+          height: 842,
+          spans: [
+            span('VISURA ORDINARIA', 80, 780),
+            span('Classificazione ATECO 2025', 25, 500),
+            span('62.10', 25, 480),
+          ],
+        },
+        {
+          number: 2,
+          width: 595,
+          height: 842,
+          spans: [
+            { ...span("7 Unita' locali", 32, 720), page: 2 },
+            { ...span("Unita' Locale n. RM/1", 37, 690), page: 2 },
+            { ...span('Data apertura: 05/12/2017', 202, 670), page: 2 },
+            { ...span('Indirizzo: ROMA (RM) VIA ESEMPIO 1', 37, 650), page: 2 },
+            {
+              ...span("Attivita' esercitata: COMMERCIO AL DETTAGLIO", 37, 630),
+              page: 2,
+            },
+            {
+              ...span("Classificazione ATECO 2025 dell'attivita'", 37, 610),
+              page: 2,
+            },
+            { ...span('47.11', 37, 590), page: 2 },
+          ],
+        },
+      ],
+    };
+
+    expect(parseExtractedDocument(pdf)).toMatchObject({
+      activity: { atecoClassifications: [{ code: '62.10' }] },
+      localUnits: [
+        {
+          number: 'RM/1',
+          address: 'ROMA (RM) VIA ESEMPIO 1',
+          openingDate: '2017-12-05',
+          primaryActivity: 'COMMERCIO AL DETTAGLIO',
+        },
+      ],
+    });
+  });
+
   it('reconstructs split role labels before assigning names', () => {
     const pdf: ExtractedPdf = {
       pages: [

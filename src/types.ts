@@ -108,6 +108,20 @@ export interface AvailableDocuments {
   financialStatementYears?: number[];
 }
 
+/** A current secondary office or local business unit reported for the entity. */
+export interface LocalUnit {
+  /** Registry identifier printed for the local unit, e.g. "MI/1". */
+  number?: string;
+  /** Address of the local unit as reported by the Business Register. */
+  address?: string;
+  /** Date on which the local unit opened. */
+  openingDate?: string;
+  /** REA registration number reported for the local unit. */
+  reaNumber?: string;
+  /** Official description of the primary activity carried out at the local unit. */
+  primaryActivity?: string;
+}
+
 /** Structured registry data. */
 export interface Officer {
   /** Name of the person as reported in the source document. */
@@ -180,6 +194,8 @@ export interface VisuraDocument {
   certifications?: Certifications;
   /** Documents reported as available for consultation from the Business Register. */
   availableDocuments?: AvailableDocuments;
+  /** Current secondary offices and local business units reported for the entity. */
+  localUnits?: LocalUnit[];
   /** Persons holding registered corporate offices, governance roles or control functions. */
   officers?: Officer[];
   /** Persons or entities holding shares, quotas or membership interests in the entity. */

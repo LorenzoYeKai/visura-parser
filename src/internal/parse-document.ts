@@ -7,6 +7,7 @@ import { isPersonRole, parsePeople } from './parse-people.js';
 import { parseClassifications } from './parse-classifications.js';
 import { parseCapital } from './parse-capital.js';
 import { joinPages } from './join-pages.js';
+import { parseLocalUnits } from './parse-local-units.js';
 
 interface FieldSpec {
   readonly key: string;
@@ -443,16 +444,21 @@ export function parseExtractedDocument(
     /^(?:\d+\s+)?(?:storia (?:delle|dei|di)|informazioni storiche|protocollo evaso\b)/i,
     spansFor,
   );
+  const companyPdf = beforeSection(
+    currentPdf,
+    /^(?:\d+\s+)?(?:sedi secondarie ed )?unit[aà]'? locali$/i,
+    spansFor,
+  );
   // Company dates precede the domain sections; later registration dates can
   // belong to a shareholder or an appointment rather than the company.
   const identityPdf = beforeSection(
-    currentPdf,
+    companyPdf,
     /^\d+\s+(?:capitale|soci|amministratori|sindaci|titolari|attivit[aà]'?|trasferimenti|scioglimento|altre cariche)\b/i,
     spansFor,
   );
   const fields: Partial<Record<ScalarKey, string>> = {};
   const activityBody = joinPages(
-    currentPdf.pages.filter((page) => page.number !== cover.number),
+    companyPdf.pages.filter((page) => page.number !== cover.number),
   );
   for (const field of FIELD_SPECS as readonly FieldSpec[]) {
     const key = field.key as ScalarKey;
@@ -463,7 +469,7 @@ export function parseExtractedDocument(
           ? identityPdf.pages
           : field.pages === 'activity'
             ? [cover, activityBody]
-            : currentPdf.pages;
+            : companyPdf.pages;
     for (const page of pages) {
       const value = findValueOnPage(
         page,
@@ -486,7 +492,7 @@ export function parseExtractedDocument(
   if (reportType !== undefined) result.reportType = reportType;
   const name =
     findBusinessName(cover, spansFor(cover)) ??
-    findBusinessNameFromLabels(currentPdf, prepare);
+    findBusinessNameFromLabels(companyPdf, prepare);
   if (name !== undefined) result.companyName = normalizeText(name);
 
   // Dates belong to their printed summary label, not the report extraction date.
@@ -508,18 +514,20 @@ export function parseExtractedDocument(
         sinceDate: date,
       };
   }
-  const people = parsePeople(currentPdf, cover.number);
+  const people = parsePeople(companyPdf, cover.number);
   if (people.primaryRepresentative)
     result.primaryRepresentative = people.primaryRepresentative;
   if (people.officers.length) result.officers = people.officers;
   if (people.shareholders.length) result.shareholders = people.shareholders;
-  const classifications = parseClassifications(currentPdf);
+  const classifications = parseClassifications(companyPdf);
   if (classifications.length)
     result.activity = {
       ...result.activity,
       atecoClassifications: classifications,
     };
-  const capital = parseCapital(currentPdf);
+  const capital = parseCapital(companyPdf);
   if (capital !== undefined) result.shareCapital = capital;
+  const localUnits = parseLocalUnits(currentPdf);
+  if (localUnits.length) result.localUnits = localUnits;
   return result;
 }

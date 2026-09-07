@@ -120,6 +120,16 @@
     "financialStatementYears": [2024, 2023, 2022, 2021]
   },
 
+  "localUnits": [
+    {
+      "number": "MI/1",
+      "address": "MILANO (MI) VIA ESEMPIO 15 - 20121",
+      "openingDate": "2023-06-01",
+      "reaNumber": "MI-2684512",
+      "primaryActivity": "CONSULENZA NEL SETTORE DELLE TECNOLOGIE DELL'INFORMATICA"
+    }
+  ],
+
   "officers": [
     {
       "name": "MARIO ROSSI",

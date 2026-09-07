@@ -362,6 +362,43 @@
       }
     },
 
+    "localUnits": {
+      "type": "array",
+      "description": "Current secondary offices and local business units reported for the entity.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+
+        "properties": {
+          "number": {
+            "type": "string",
+            "description": "Registry identifier printed for the local unit, e.g. 'MI/1'."
+          },
+
+          "address": {
+            "type": "string",
+            "description": "Address of the local unit as reported by the Business Register."
+          },
+
+          "openingDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date on which the local unit opened."
+          },
+
+          "reaNumber": {
+            "type": "string",
+            "description": "REA registration number reported for the local unit."
+          },
+
+          "primaryActivity": {
+            "type": "string",
+            "description": "Official description of the primary activity carried out at the local unit."
+          }
+        }
+      }
+    },
+
     "officers": {
       "type": "array",
       "description": "Persons holding registered corporate offices, governance roles or control functions.",
