@@ -134,6 +134,11 @@
     {
       "name": "MARIO ROSSI",
       "taxCode": "RSSMRA80A01F205X",
+      "birthDate": "1980-01-01",
+      "birthPlace": "MILANO",
+      "birthProvince": "MI",
+      "citizenship": "ITALIANA",
+      "residenceAddress": "MILANO (MI) VIA ESEMPIO 10 - 20121",
       "roles": [
         "PRESIDENTE CONSIGLIO AMMINISTRAZIONE",
         "AMMINISTRATORE DELEGATO"
@@ -170,6 +175,11 @@
     {
       "name": "MARIO ROSSI",
       "taxCode": "RSSMRA80A01F205X",
+      "birthDate": "1980-01-01",
+      "birthPlace": "MILANO",
+      "birthProvince": "MI",
+      "citizenship": "ITALIANA",
+      "residenceAddress": "MILANO (MI) VIA ESEMPIO 10 - 20121",
 
       "rightType": "PROPRIETA'",
 

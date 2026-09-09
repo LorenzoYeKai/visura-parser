@@ -132,6 +132,9 @@ The implemented invariants are:
 - current local units retain their printed order and are omitted when their detail block is absent;
 - dates use strict ISO calendar strings; counts and amounts are numbers,
   with explicit parsing of Italian punctuation and precision checks;
+- optional officer and shareholder identity details stay attached to the
+  matching person record; birth dates use strict ISO calendar strings, while
+  birthplace, province, citizenship and residence preserve printed values;
 - ordinary, historical, and evasion documents have `reportType`; a recognized
   shareholder block omits that field rather than inventing a full-report type;
 - invalid, textless, password-required, or unrelated documents fail with a
@@ -189,6 +192,12 @@ raw printed amount as evidence.
 For dates, expose ISO calendar dates only after strict parsing of Italian
 `dd/mm/yyyy` forms. Preserve the raw value and reject impossible dates rather
 than allowing the host locale to interpret them.
+
+Person details must remain inside the role or ownership record that contains
+their source spans. The same person may appear as both an officer and a
+shareholder. Copy identity facts only when that occurrence identifies the same
+person by tax code or normalized name; never borrow a nearby person's birth or
+residence data.
 
 For ATECO, store the code, printed description, code system and explicit
 version when present. ATECO 2025 entered into force on 1 January 2025 and was

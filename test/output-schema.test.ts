@@ -280,6 +280,38 @@ describe('output schema contract', () => {
     );
   });
 
+  it('validates normalized person dates and rejects locale-formatted dates', async () => {
+    const schema = await readJson<JsonSchemaObject>('../outputSchema.json');
+    const validate = createValidator(schema);
+
+    expect(
+      validate({
+        officers: [
+          {
+            birthDate: '1980-01-01',
+            birthPlace: 'MILANO',
+            birthProvince: 'MI',
+            citizenship: 'ITALIANA',
+            residenceAddress: 'MILANO VIA ESEMPIO 1',
+          },
+        ],
+        shareholders: [
+          {
+            birthDate: '1982-12-31',
+            birthPlace: 'PARIGI',
+            birthProvince: 'EE',
+            citizenship: 'FRANCESE',
+            residenceAddress: 'PARIGI VIA ESEMPIO 2',
+          },
+        ],
+      }),
+    ).toBe(true);
+    expect(validate({ officers: [{ birthDate: '01/01/1980' }] })).toBe(false);
+    expect(validate({ shareholders: [{ birthProvince: 'Milano' }] })).toBe(
+      false,
+    );
+  });
+
   it('validates exampleOutput.json', async () => {
     const schema = await readJson<SchemaObject>('../outputSchema.json');
     const example = await readJson<VisuraDocument>('../exampleOutput.json');

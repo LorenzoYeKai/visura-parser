@@ -128,6 +128,16 @@ export interface Officer {
   name?: string;
   /** Italian tax identification code of the person, when reported. */
   taxCode?: string;
+  /** Date of birth of the person, normalized as an ISO calendar date. */
+  birthDate?: string;
+  /** Place of birth of the person, without the separately reported province code. */
+  birthPlace?: string;
+  /** Province or foreign-state code printed with the person's place of birth. */
+  birthProvince?: string;
+  /** Citizenship of the person as reported in the source document. */
+  citizenship?: string;
+  /** Residence address of the person as reported in the source document. */
+  residenceAddress?: string;
   /** Official corporate roles held by the person, preserved as reported in the source document. */
   roles?: string[];
 }
@@ -138,6 +148,16 @@ export interface Shareholder {
   name?: string;
   /** Italian tax identification code of the shareholder or member, when reported. */
   taxCode?: string;
+  /** Date of birth of an individual shareholder, normalized as an ISO calendar date. */
+  birthDate?: string;
+  /** Place of birth of an individual shareholder, without the separately reported province code. */
+  birthPlace?: string;
+  /** Province or foreign-state code printed with an individual shareholder's place of birth. */
+  birthProvince?: string;
+  /** Citizenship of an individual shareholder as reported in the source document. */
+  citizenship?: string;
+  /** Residence address of an individual shareholder as reported in the source document. */
+  residenceAddress?: string;
   /** Official type of right over the shares or ownership interest as reported in the source document, e.g. 'PROPRIETA'', 'USUFRUTTO' or 'NUDA PROPRIETA''. */
   rightType?: string;
   /** Nominal value of the shares, quotas or ownership interest held. */

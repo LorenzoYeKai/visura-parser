@@ -59,9 +59,11 @@ and is copied to `filename`; it is not inferred from the PDF.
 
 Missing fields are omitted. Counts and monetary amounts are numbers; explicit
 availability values are booleans. Dates use ISO `YYYY-MM-DD`. Official Italian
-role names are preserved in structured officer and shareholder records. Current
-secondary offices and local business units are returned in `localUnits`, in
-their printed order.
+role names are preserved in structured officer and shareholder records. When
+the source prints them, individual officers and shareholders also include birth
+date, birthplace, birth-province code, citizenship, and residence address.
+Current secondary offices and local business units are returned in `localUnits`,
+in their printed order.
 See the [example output](exampleOutput.json) and
 [the schema](outputSchema.json).
 

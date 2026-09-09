@@ -1,7 +1,7 @@
 import type { Officer, Representative, Shareholder } from '../types.js';
 import type { ExtractedPage, ExtractedPdf, PositionedSpan } from './model.js';
 import { foldText, normalizeText, semanticSpans } from './text.js';
-import { parseItalianAmount } from './values.js';
+import { parseItalianAmount, parseItalianDate } from './values.js';
 import { joinPages } from './join-pages.js';
 
 const OFFICER_ROLE =
@@ -59,6 +59,15 @@ interface Identity {
   name: PositionedSpan;
   taxCode: string;
   y: number;
+  details: PersonDetails;
+}
+
+interface PersonDetails {
+  birthDate?: string;
+  birthPlace?: string;
+  birthProvince?: string;
+  citizenship?: string;
+  residenceAddress?: string;
 }
 
 function identities(
@@ -90,7 +99,24 @@ function identities(
       name &&
       !result.some((item) => item.name === name && item.taxCode === match[1])
     )
-      result.push({ name, taxCode: match[1], y: span.y });
+      result.push({ name, taxCode: match[1], y: span.y, details: {} });
+  }
+  for (const record of result) {
+    const next = result
+      .filter(
+        (candidate) =>
+          candidate.y < record.y - 2 &&
+          candidate.name.x < page.width / 2 === record.name.x < page.width / 2,
+      )
+      .sort((left, right) => right.y - left.y)[0];
+    const upper = record.name.y + OWNERSHIP_ROW_TOLERANCE;
+    const lower = Math.max(
+      record.y - 100,
+      next === undefined ? -Infinity : next.y + OWNERSHIP_ROW_TOLERANCE,
+    );
+    record.details = parsePersonDetails(
+      spans.filter((candidate) => candidate.y <= upper && candidate.y > lower),
+    );
   }
   return result;
 }
@@ -149,6 +175,213 @@ function fullName(page: ExtractedPage, first: PositionedSpan): string {
   return normalizeText(parts.join(' '));
 }
 
+function identityForName(
+  page: ExtractedPage,
+  records: readonly Identity[],
+  name: PositionedSpan,
+): Identity | undefined {
+  const direct = records.find((record) => record.name === name);
+  if (direct !== undefined) return direct;
+  const foldedName = foldText(fullName(page, name));
+  const matching = records.filter(
+    (record) => foldText(fullName(page, record.name)) === foldedName,
+  );
+  return matching.length === 1 ? matching[0] : undefined;
+}
+
+function valueBeside(
+  label: PositionedSpan,
+  spans: readonly PositionedSpan[],
+): string | undefined {
+  const candidates = spans.filter(
+    (span) =>
+      span !== label &&
+      Math.abs(span.y - label.y) <= 2 &&
+      span.x > label.x + label.width - 2,
+  );
+  const leftmost = candidates.reduce(
+    (minimum, span) => Math.min(minimum, span.x),
+    Infinity,
+  );
+  const value = candidates
+    .filter((span) => Math.abs(span.x - leftmost) <= 2)
+    .sort((left, right) => right.width - left.width)[0];
+  return value === undefined ? undefined : normalizeText(value.text);
+}
+
+function valueBelow(
+  label: PositionedSpan,
+  spans: readonly PositionedSpan[],
+): PositionedSpan | undefined {
+  return spans
+    .filter(
+      (span) =>
+        span.y < label.y - 2 &&
+        label.y - span.y <= 36 &&
+        span.x >= label.x - 2 &&
+        !TAX_CODE.test(normalizeText(span.text)) &&
+        !/^(?:codice fiscale|cittadinanza|residenza|residente|nat[oa]\b|carica\b)/i.test(
+          normalizeText(span.text),
+        ),
+    )
+    .sort(
+      (left, right) =>
+        right.y - left.y || left.x - right.x || right.width - left.width,
+    )[0];
+}
+
+function assignBirthDetails(result: PersonDetails, value: string): void {
+  const normalized = normalizeText(value).replace(/^:\s*/, '');
+  const dateMatch = /(?:^|\s)il\s+(\d{2}\/\d{2}\/\d{4})(?:\s|$)/i.exec(
+    normalized,
+  );
+  const placeWithProvince = normalizeText(
+    dateMatch === null ? normalized : normalized.slice(0, dateMatch.index),
+  );
+  const province = /^(.*?)\s+\(([A-Z]{2})\)$/i.exec(placeWithProvince);
+  const place = normalizeText(province?.[1] ?? placeWithProvince);
+  if (place.length > 0 && result.birthPlace === undefined)
+    result.birthPlace = place;
+  if (province?.[2] && result.birthProvince === undefined)
+    result.birthProvince = province[2].toUpperCase();
+  if (dateMatch?.[1] && result.birthDate === undefined) {
+    const date = parseItalianDate(dateMatch[1]);
+    if (date !== undefined) result.birthDate = date;
+  }
+}
+
+function parsePersonDetails(spans: readonly PositionedSpan[]): PersonDetails {
+  const result: PersonDetails = {};
+  const ordered = [...spans].sort(
+    (left, right) =>
+      right.y - left.y || left.x - right.x || left.width - right.width,
+  );
+
+  for (const span of ordered) {
+    const text = normalizeText(span.text);
+    const born = /^nat[oa]\s+(?:ad|a)\s*:?[ ]*(.+)$/i.exec(text);
+    if (born?.[1]) assignBirthDetails(result, born[1]);
+    if (/^nat[oa]\s+(?:ad|a)\s*:?$/i.test(text)) {
+      const beside = valueBeside(span, spans);
+      const below = beside === undefined ? valueBelow(span, spans) : undefined;
+      const value = beside ?? below?.text;
+      if (value !== undefined) {
+        const followingDate =
+          below === undefined
+            ? undefined
+            : spans.find(
+                (candidate) =>
+                  candidate.y < below.y - 2 &&
+                  below.y - candidate.y <= 20 &&
+                  Math.abs(candidate.x - below.x) <= 3 &&
+                  /^il\s+\d{2}\/\d{2}\/\d{4}$/i.test(
+                    normalizeText(candidate.text),
+                  ),
+              );
+        assignBirthDetails(
+          result,
+          `${normalizeText(value)}${followingDate === undefined ? '' : ` ${normalizeText(followingDate.text)}`}`,
+        );
+      }
+    }
+
+    const citizenship = /^cittadinanza\s*:?\s*(.*)$/i.exec(text);
+    if (citizenship !== null && result.citizenship === undefined) {
+      const value =
+        citizenship[1] ||
+        valueBeside(span, spans) ||
+        valueBelow(span, spans)?.text;
+      if (value) result.citizenship = normalizeText(value);
+    }
+
+    const residence = /^(?:residenza|residente(?:\s+a)?)\s*:?\s*(.*)$/i.exec(
+      text,
+    );
+    if (residence !== null && result.residenceAddress === undefined) {
+      const value =
+        residence[1] ||
+        valueBeside(span, spans) ||
+        valueBelow(span, spans)?.text;
+      if (value) result.residenceAddress = normalizeText(value);
+    }
+  }
+  return result;
+}
+
+function personDetailSpans(
+  spans: readonly PositionedSpan[],
+  records: readonly Identity[],
+  sections: readonly PositionedSpan[],
+  pageWidth: number,
+  role: PositionedSpan,
+  name: PositionedSpan,
+): PositionedSpan[] {
+  const nextIdentity = records
+    .filter(
+      (record) =>
+        record.name.y < name.y - 2 &&
+        record.name.x < pageWidth / 2 === name.x < pageWidth / 2,
+    )
+    .sort((left, right) => right.name.y - left.name.y)[0];
+  const nextSection = sections
+    .filter((span) => span.y < name.y)
+    .sort((left, right) => right.y - left.y)[0];
+  const lower = Math.max(
+    name.y - 180,
+    nextIdentity === undefined
+      ? -Infinity
+      : nextIdentity.name.y + OWNERSHIP_ROW_TOLERANCE,
+    nextSection?.y ?? -Infinity,
+  );
+  const upper = Math.max(role.y, name.y) + OWNERSHIP_ROW_TOLERANCE;
+  return spans.filter(
+    (span) =>
+      span.y <= upper &&
+      span.y > lower &&
+      !SECTION.test(normalizeText(span.text)),
+  );
+}
+
+function ownershipDetailSpans(
+  spans: readonly PositionedSpan[],
+  roles: readonly PositionedSpan[],
+  sections: readonly PositionedSpan[],
+  role: PositionedSpan,
+  name: PositionedSpan,
+): PositionedSpan[] {
+  const nextRole = roles.find((other) => other.y < name.y - 2);
+  const nextSection = sections
+    .filter((span) => span.y < name.y)
+    .sort((left, right) => right.y - left.y)[0];
+  const lower = Math.max(
+    name.y - 180,
+    nextRole === undefined ? -Infinity : nextRole.y + OWNERSHIP_ROW_TOLERANCE,
+    nextSection?.y ?? -Infinity,
+  );
+  return spans.filter(
+    (span) =>
+      span.y <= role.y + OWNERSHIP_ROW_TOLERANCE &&
+      span.y > lower &&
+      !SECTION.test(normalizeText(span.text)),
+  );
+}
+
+function mergePersonDetails(
+  target: PersonDetails,
+  source: PersonDetails,
+): void {
+  for (const key of [
+    'birthDate',
+    'birthPlace',
+    'birthProvince',
+    'citizenship',
+    'residenceAddress',
+  ] as const) {
+    if (target[key] === undefined && source[key] !== undefined)
+      target[key] = source[key];
+  }
+}
+
 function mergeOfficer(officers: Officer[], entry: Officer): void {
   const existing = officers.find((other) =>
     entry.taxCode !== undefined && other.taxCode !== undefined
@@ -160,6 +393,7 @@ function mergeOfficer(officers: Officer[], entry: Officer): void {
     return;
   }
   if (entry.taxCode !== undefined) existing.taxCode = entry.taxCode;
+  mergePersonDetails(existing, entry);
   for (const role of entry.roles ?? []) {
     existing.roles ??= [];
     if (!existing.roles.some((other) => foldText(other) === foldText(role)))
@@ -241,7 +475,7 @@ export function parsePeople(
     let identity =
       adjacent === undefined
         ? undefined
-        : records.find((record) => record.name === adjacent);
+        : identityForName(page, records, adjacent);
     if (adjacent === undefined) {
       identity = records
         .filter(
@@ -265,9 +499,17 @@ export function parsePeople(
     }
     const name = adjacent ?? identity?.name;
     if (name === undefined) continue;
+    const details = { ...(identity?.details ?? {}) };
+    mergePersonDetails(
+      details,
+      parsePersonDetails(
+        personDetailSpans(spans, records, sections, page.width, role, name),
+      ),
+    );
     const person = {
       name: fullName(page, name),
       ...(identity ? { taxCode: identity.taxCode } : {}),
+      ...details,
     };
     if (classification.officer) {
       mergeOfficer(result.officers, { ...person, roles: [text] });
@@ -302,26 +544,14 @@ export function parsePeople(
       )
         result.primaryRepresentative = { name: person.name, role: text };
       // Quota facts must be inside this ownership record. No capital/paid-up fallback.
-      const nextRole = roles.find((other) => other.y < name.y - 2);
-      const nextSection = spans
-        .filter(
-          (span) => SECTION.test(normalizeText(span.text)) && span.y < name.y,
-        )
-        .sort((a, b) => b.y - a.y)[0];
-      const lower = Math.max(
-        name.y - 180,
-        nextRole === undefined
-          ? -Infinity
-          : nextRole.y + OWNERSHIP_ROW_TOLERANCE,
-        nextSection?.y ?? -Infinity,
+      const ownershipDetails = ownershipDetailSpans(
+        spans,
+        roles,
+        sections,
+        role,
+        name,
       );
-      const detail = spans.filter(
-        (span) =>
-          span.y <= role.y + OWNERSHIP_ROW_TOLERANCE &&
-          span.y > lower &&
-          !SECTION.test(normalizeText(span.text)),
-      );
-      for (const span of detail) {
+      for (const span of ownershipDetails) {
         const value = normalizeText(span.text);
         const nominal =
           /^(?:valore nominale|quota)\s*(?:di nominali)?\s*:?\s*([\d.,]+)\s*(euro|EUR)?$/i.exec(
@@ -358,9 +588,45 @@ export function parsePeople(
             shareholder.nominalValue === undefined ||
             other.nominalValue === shareholder.nominalValue),
       );
-      if (existing) Object.assign(existing, shareholder);
-      else result.shareholders.push(shareholder);
+      if (existing) {
+        mergePersonDetails(existing, shareholder);
+        Object.assign(existing, {
+          ...(shareholder.taxCode !== undefined
+            ? { taxCode: shareholder.taxCode }
+            : {}),
+          ...(shareholder.rightType !== undefined
+            ? { rightType: shareholder.rightType }
+            : {}),
+          ...(shareholder.nominalValue !== undefined
+            ? { nominalValue: shareholder.nominalValue }
+            : {}),
+          ...(shareholder.currency !== undefined
+            ? { currency: shareholder.currency }
+            : {}),
+          ...(shareholder.ownershipPercentage !== undefined
+            ? { ownershipPercentage: shareholder.ownershipPercentage }
+            : {}),
+          ...(shareholder.isSoleShareholder !== undefined
+            ? { isSoleShareholder: shareholder.isSoleShareholder }
+            : {}),
+        });
+      } else result.shareholders.push(shareholder);
     }
+  }
+  for (const record of records) {
+    for (const person of [...result.officers, ...result.shareholders]) {
+      if (person.taxCode === record.taxCode)
+        mergePersonDetails(person, record.details);
+    }
+  }
+  for (const shareholder of result.shareholders) {
+    if (shareholder.taxCode === undefined) continue;
+    const officer = result.officers.find(
+      (candidate) => candidate.taxCode === shareholder.taxCode,
+    );
+    if (officer === undefined) continue;
+    mergePersonDetails(officer, shareholder);
+    mergePersonDetails(shareholder, officer);
   }
   return result;
 }
