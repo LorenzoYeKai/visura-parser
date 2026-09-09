@@ -417,6 +417,33 @@
             "description": "Italian tax identification code of the person, when reported."
           },
 
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of birth of the person, normalized as an ISO calendar date."
+          },
+
+          "birthPlace": {
+            "type": "string",
+            "description": "Place of birth of the person, without the separately reported province code."
+          },
+
+          "birthProvince": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "description": "Province or foreign-state code printed with the person's place of birth."
+          },
+
+          "citizenship": {
+            "type": "string",
+            "description": "Citizenship of the person as reported in the source document."
+          },
+
+          "residenceAddress": {
+            "type": "string",
+            "description": "Residence address of the person as reported in the source document."
+          },
+
           "roles": {
             "type": "array",
             "description": "Official corporate roles held by the person, preserved as reported in the source document.",
@@ -444,6 +471,33 @@
           "taxCode": {
             "type": "string",
             "description": "Italian tax identification code of the shareholder or member, when reported."
+          },
+
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of birth of an individual shareholder, normalized as an ISO calendar date."
+          },
+
+          "birthPlace": {
+            "type": "string",
+            "description": "Place of birth of an individual shareholder, without the separately reported province code."
+          },
+
+          "birthProvince": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$",
+            "description": "Province or foreign-state code printed with an individual shareholder's place of birth."
+          },
+
+          "citizenship": {
+            "type": "string",
+            "description": "Citizenship of an individual shareholder as reported in the source document."
+          },
+
+          "residenceAddress": {
+            "type": "string",
+            "description": "Residence address of an individual shareholder as reported in the source document."
           },
 
           "rightType": {

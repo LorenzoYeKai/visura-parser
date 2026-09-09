@@ -90,6 +90,39 @@ describe('parseVisura', () => {
     });
   });
 
+  it('extracts optional officer identity details through the public parser', async () => {
+    const result = await parseVisura(
+      makeTextPdf([
+        {
+          text: "VISURA ORDINARIA SOCIETA' DI CAPITALE",
+          x: 83,
+          y: 648,
+          size: 11,
+        },
+        { text: 'IMPRESA SINTETICA S.R.L.', x: 83, y: 614, size: 14 },
+        { text: 'Amministratore Unico', x: 25, y: 400 },
+        { text: 'MARIO ROSSI', x: 150, y: 400 },
+        { text: 'Nato a ROMA (RM) il 01/01/1980', x: 150, y: 380 },
+        { text: 'Codice fiscale: RSSMRA80A01F205X', x: 150, y: 360 },
+        { text: 'Cittadinanza: ITALIANA', x: 150, y: 340 },
+        { text: 'Residenza: ROMA VIA ESEMPIO 1', x: 150, y: 320 },
+      ]),
+    );
+
+    expect(result.officers).toEqual([
+      {
+        name: 'MARIO ROSSI',
+        taxCode: 'RSSMRA80A01F205X',
+        birthDate: '1980-01-01',
+        birthPlace: 'ROMA',
+        birthProvince: 'RM',
+        citizenship: 'ITALIANA',
+        residenceAddress: 'ROMA VIA ESEMPIO 1',
+        roles: ['Amministratore Unico'],
+      },
+    ]);
+  });
+
   it('rejects a PDF without extractable text', async () => {
     const parsing = parseVisura(makeTextPdf([]));
 

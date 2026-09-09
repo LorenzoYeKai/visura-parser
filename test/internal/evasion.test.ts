@@ -133,6 +133,9 @@ describe('evasion report layout', () => {
       {
         name: 'MARIO ROSSI',
         taxCode: 'RSSMRA80A01F205X',
+        birthDate: '1980-01-01',
+        birthPlace: 'ROMA',
+        birthProvince: 'RM',
         roles: ['Amministratore Unico'],
       },
     ]);
@@ -143,6 +146,9 @@ describe('evasion report layout', () => {
       {
         name: 'MARIO ROSSI',
         taxCode: 'RSSMRA80A01F205X',
+        birthDate: '1980-01-01',
+        birthPlace: 'ROMA',
+        birthProvince: 'RM',
         rightType: "proprieta'",
         nominalValue: 4800,
         currency: 'EUR',
@@ -213,6 +219,8 @@ describe('evasion report layout', () => {
         {
           name: 'ANNA VERDI',
           taxCode: 'VRDNNA82E55F205Z',
+          birthPlace: 'ROMA',
+          birthProvince: 'RM',
           roles: ['Titolare di impresa individuale', `Titolare ${signatory}`],
         },
       ]);
@@ -290,6 +298,8 @@ describe('evasion report layout', () => {
       {
         name: 'ANNA VERDI',
         taxCode: 'VRDNNA82E55F205Z',
+        birthPlace: 'ROMA',
+        birthProvince: 'RM',
         roles: ['Presidente Consiglio Amministrazione'],
       },
     ]);

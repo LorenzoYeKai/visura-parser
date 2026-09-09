@@ -148,20 +148,108 @@ describe('new schema semantics', () => {
     expect(result.shareholders).toBeUndefined();
   });
 
-  it('keeps personal tax codes attached to names when birthplace cells are split', () => {
+  it('extracts split person identity details without losing the tax code', () => {
     const result = parse([
       span('Amministratore Unico', 25, 700, 110),
       span('MARIO ROSSI', 150, 700),
       span('Nato a', 25, 680),
-      span('ROMA (RM)', 150, 680),
+      span('ROMA (RM) il 01/01/1980', 150, 680),
       span('Codice fiscale', 25, 660),
       span('RSSMRA80A01F205X', 150, 660),
+      span('Cittadinanza', 25, 640),
+      span('ITALIANA', 150, 640),
+      span('Residenza', 25, 620),
+      span('ROMA (RM) VIA ESEMPIO 1', 150, 620),
     ]);
     expect(result.officers).toEqual([
       {
         name: 'MARIO ROSSI',
         taxCode: 'RSSMRA80A01F205X',
+        birthDate: '1980-01-01',
+        birthPlace: 'ROMA',
+        birthProvince: 'RM',
+        citizenship: 'ITALIANA',
+        residenceAddress: 'ROMA (RM) VIA ESEMPIO 1',
         roles: ['Amministratore Unico'],
+      },
+    ]);
+  });
+
+  it('keeps identity details on the right shareholder when people are adjacent', () => {
+    const result = parse([
+      span("Proprieta'", 25, 740),
+      span('ANNA VERDI', 25, 720),
+      span('Nata a PARIGI (EE) il 31/12/1982', 150, 720),
+      span('Codice fiscale: VRDNNA82T71Z110X', 150, 700),
+      span('Cittadinanza: FRANCESE', 150, 680),
+      span('Residenza: PARIGI VIA ESEMPIO 1', 150, 660),
+      span("Proprieta'", 25, 650),
+      span('MARIO ROSSI', 25, 630),
+      span('Nato a MILANO (MI) il 31/02/1980', 150, 630),
+      span('Codice fiscale: RSSMRA80A01F205X', 150, 610),
+      span('Cittadinanza: ITALIANA', 150, 590),
+      span('Residenza: MILANO VIA ESEMPIO 2', 150, 570),
+    ]);
+
+    expect(result.shareholders).toEqual([
+      {
+        name: 'ANNA VERDI',
+        taxCode: 'VRDNNA82T71Z110X',
+        birthDate: '1982-12-31',
+        birthPlace: 'PARIGI',
+        birthProvince: 'EE',
+        citizenship: 'FRANCESE',
+        residenceAddress: 'PARIGI VIA ESEMPIO 1',
+        rightType: "Proprieta'",
+      },
+      {
+        name: 'MARIO ROSSI',
+        taxCode: 'RSSMRA80A01F205X',
+        birthPlace: 'MILANO',
+        birthProvince: 'MI',
+        citizenship: 'ITALIANA',
+        residenceAddress: 'MILANO VIA ESEMPIO 2',
+        rightType: "Proprieta'",
+      },
+    ]);
+  });
+
+  it('extracts birthplace and date when the birth row is vertically split', () => {
+    const result = parse([
+      span('Amministratore', 25, 700),
+      span('MARIO ROSSI', 150, 700),
+      span('Codice fiscale: RSSMRA80A01F205X', 150, 680),
+      span('Nato a', 25, 660),
+      span('ROMA (RM)', 150, 640),
+      span('il 01/01/1980', 150, 620),
+    ]);
+
+    expect(result.officers).toEqual([
+      {
+        name: 'MARIO ROSSI',
+        taxCode: 'RSSMRA80A01F205X',
+        birthDate: '1980-01-01',
+        birthPlace: 'ROMA',
+        birthProvince: 'RM',
+        roles: ['Amministratore'],
+      },
+    ]);
+  });
+
+  it('links a unique partnership summary name to its detailed identity', () => {
+    const result = parse([
+      span('Socio Accomandante', 25, 740),
+      span('MARIO ROSSI', 150, 740),
+      span('MARIO ROSSI', 25, 700),
+      span('Codice fiscale: RSSMRA80A01F205X', 150, 680),
+      span('Cittadinanza: ITALIANA', 150, 660),
+    ]);
+
+    expect(result.shareholders).toEqual([
+      {
+        name: 'MARIO ROSSI',
+        taxCode: 'RSSMRA80A01F205X',
+        citizenship: 'ITALIANA',
       },
     ]);
   });
