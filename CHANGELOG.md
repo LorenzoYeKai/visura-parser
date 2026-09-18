@@ -1,5 +1,11 @@
 # visura-parser
 
+## 1.2.0
+
+### Minor Changes
+
+- 8d93180: Extract optional birth date, birthplace, birth-province code, citizenship, and residence address for individual officers and shareholders. Repeated summary and detail rows now resolve to one person when a unique normalized name identifies the detailed tax-code record.
+
 ## 1.1.0
 
 ### Minor Changes
