@@ -10,6 +10,8 @@ export interface Representative {
 export interface AtecoClassification {
   /** ATECO or ATECORI classification code. */
   code?: string;
+  /** ATECO classification version, only when an explicit version heading is printed. */
+  version?: string;
   /** Official activity description associated with the classification code. */
   description?: string;
   /** Official classification qualifier as reported in the source document, when available, e.g. 'prevalente' or 'primaria'. */
@@ -120,6 +122,20 @@ export interface LocalUnit {
   reaNumber?: string;
   /** Official description of the primary activity carried out at the local unit. */
   primaryActivity?: string;
+  /** Type or facility kind of the local unit as reported by the Business Register. */
+  type?: string;
+  /** Official description of a secondary activity carried out at the local unit. */
+  secondaryActivity?: string;
+  /** Primary/local Italian ATECO classification code associated with the local unit. */
+  atecoCode?: string;
+  /** ATECO or ATECORI classifications reported for the local unit. */
+  atecoClassifications?: AtecoClassification[];
+  /** Trade name (insegna) reported for the local unit. */
+  tradeName?: string;
+  /** Activity declarations or SCIA filings, preserved as printed source prose. */
+  activityDeclarations?: string[];
+  /** Licences and authorisations, preserved as printed source prose. */
+  licensesAndRegistrations?: string[];
 }
 
 /** Structured registry data. */
