@@ -137,6 +137,11 @@
                 "description": "ATECO or ATECORI classification code."
               },
 
+              "version": {
+                "type": "string",
+                "description": "ATECO classification version, only when an explicit version heading is printed."
+              },
+
               "description": {
                 "type": "string",
                 "description": "Official activity description associated with the classification code."
@@ -394,6 +399,73 @@
           "primaryActivity": {
             "type": "string",
             "description": "Official description of the primary activity carried out at the local unit."
+          },
+
+          "type": {
+            "type": "string",
+            "description": "Type or facility kind of the local unit as reported by the Business Register."
+          },
+
+          "secondaryActivity": {
+            "type": "string",
+            "description": "Official description of a secondary activity carried out at the local unit."
+          },
+
+          "atecoCode": {
+            "type": "string",
+            "description": "Primary/local Italian ATECO classification code associated with the local unit."
+          },
+
+          "atecoClassifications": {
+            "type": "array",
+            "description": "ATECO or ATECORI classifications reported for the local unit.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "description": "ATECO or ATECORI classification code."
+                },
+
+                "version": {
+                  "type": "string",
+                  "description": "ATECO classification version, only when an explicit version heading is printed."
+                },
+
+                "description": {
+                  "type": "string",
+                  "description": "Official activity description associated with the classification code."
+                },
+
+                "importance": {
+                  "type": "string",
+                  "description": "Official classification qualifier as reported in the source document, when available, e.g. 'prevalente' or 'primaria'."
+                }
+              }
+            }
+          },
+
+          "tradeName": {
+            "type": "string",
+            "description": "Trade name (insegna) reported for the local unit."
+          },
+
+          "activityDeclarations": {
+            "type": "array",
+            "description": "Activity declarations or SCIA filings, preserved as printed source prose.",
+            "items": {
+              "type": "string"
+            }
+          },
+
+          "licensesAndRegistrations": {
+            "type": "array",
+            "description": "Licences and authorisations, preserved as printed source prose.",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }

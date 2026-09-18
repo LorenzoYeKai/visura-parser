@@ -126,7 +126,31 @@
       "address": "MILANO (MI) VIA ESEMPIO 15 - 20121",
       "openingDate": "2023-06-01",
       "reaNumber": "MI-2684512",
-      "primaryActivity": "CONSULENZA NEL SETTORE DELLE TECNOLOGIE DELL'INFORMATICA"
+      "primaryActivity": "CONSULENZA NEL SETTORE DELLE TECNOLOGIE DELL'INFORMATICA",
+      "type": "UNITA' LOCALE",
+      "secondaryActivity": "ELABORAZIONE DATI",
+      "atecoCode": "62.02.00",
+      "atecoClassifications": [
+        {
+          "code": "62.02.00",
+          "version": "2007-2022",
+          "description": "CONSULENZA NEL SETTORE DELLE TECNOLOGIE DELL'INFORMATICA",
+          "importance": "PRIMARIA"
+        },
+        {
+          "code": "63.11.19",
+          "version": "2007-2022",
+          "description": "ALTRE ELABORAZIONI ELETTRONICHE DI DATI",
+          "importance": "SECONDARIA"
+        }
+      ],
+      "tradeName": "ACME DIGITAL LAB",
+      "activityDeclarations": [
+        "SCIA PRESENTATA AL SUAP DEL COMUNE DI MILANO IN DATA 01/06/2023"
+      ],
+      "licensesAndRegistrations": [
+        "AUTORIZZAZIONE COMUNALE ALL'ESERCIZIO DELL'ATTIVITA' DEL 01/06/2023"
+      ]
     }
   ],
 
