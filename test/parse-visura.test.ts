@@ -43,8 +43,13 @@ describe('parseVisura', () => {
       { text: 'ALFA HOLDING S.R.L.', x: 25, y: 184 },
       { text: "7 Sedi secondarie ed unita' locali", x: 25, y: 160 },
       { text: "Unita' Locale n. RM/1", x: 37, y: 140 },
+      { text: 'PUNTO VENDITA', x: 37, y: 130 },
       { text: 'Data apertura: 05/12/2017', x: 202, y: 120 },
       { text: 'Indirizzo: ROMA (RM) VIA PROVA 2 - 00100', x: 37, y: 100 },
+      { text: "Attivita' secondaria esercitata", x: 37, y: 80 },
+      { text: 'RISTORAZIONE', x: 202, y: 70 },
+      { text: "Classificazione ATECO 2025 dell'attivita'", x: 37, y: 50 },
+      { text: 'Codice: 47.11.00', x: 37, y: 35 },
     ]);
 
     const originalBytes = input.slice();
@@ -74,11 +79,56 @@ describe('parseVisura', () => {
       localUnits: [
         {
           number: 'RM/1',
+          type: 'PUNTO VENDITA',
           address: 'ROMA (RM) VIA PROVA 2 - 00100',
           openingDate: '2017-12-05',
+          secondaryActivity: 'RISTORAZIONE',
+          atecoClassifications: [{ code: '47.11.00', version: '2025' }],
+          atecoCode: '47.11.00',
         },
       ],
     });
+  });
+
+  it('maps local-unit activity fields without replacing company activity', async () => {
+    const result = await parseVisura(
+      makeTextPdf([
+        { text: "VISURA ORDINARIA SOCIETA' DI CAPITALE", x: 83, y: 780 },
+        { text: 'IMPRESA LOCALE S.R.L.', x: 83, y: 750, size: 14 },
+        { text: "Attivita' prevalente", x: 25, y: 700 },
+        { text: 'CONSULENZA AZIENDALE', x: 149, y: 700 },
+        { text: "7 Sedi secondarie ed unita' locali", x: 25, y: 620 },
+        { text: "Unita' Locale n. RM / 1", x: 37, y: 590 },
+        { text: 'PUNTO VENDITA', x: 37, y: 570 },
+        { text: 'Data apertura: 05/12/2017', x: 202, y: 550 },
+        { text: 'Indirizzo: ROMA (RM) VIA PROVA 2 - 00100', x: 37, y: 530 },
+        { text: "Attivita' esercitata", x: 37, y: 510 },
+        { text: 'COMMERCIO AL DETTAGLIO', x: 202, y: 490 },
+        { text: "Attivita' secondaria esercitata", x: 37, y: 470 },
+        { text: 'RISTORAZIONE', x: 202, y: 450 },
+        { text: "Classificazione ATECO 2025 dell'attivita'", x: 37, y: 430 },
+        { text: 'Codice: 47.11.00', x: 37, y: 410 },
+        { text: '9 Storia delle modifiche', x: 25, y: 380 },
+        { text: "Unita' Locale n. RM / 99", x: 37, y: 360 },
+        { text: 'STORICO DA IGNORARE', x: 37, y: 340 },
+        { text: 'Data apertura: 01/01/2000', x: 202, y: 320 },
+      ]),
+    );
+
+    expect(result.activity?.primaryActivity).toBe('CONSULENZA AZIENDALE');
+    expect(result.activity?.atecoCode).toBeUndefined();
+    expect(result.localUnits).toEqual([
+      {
+        number: 'RM/1',
+        type: 'PUNTO VENDITA',
+        address: 'ROMA (RM) VIA PROVA 2 - 00100',
+        openingDate: '2017-12-05',
+        primaryActivity: 'COMMERCIO AL DETTAGLIO',
+        secondaryActivity: 'RISTORAZIONE',
+        atecoClassifications: [{ code: '47.11.00', version: '2025' }],
+        atecoCode: '47.11.00',
+      },
+    ]);
   });
 
   it('returns a typed error for a non-PDF input', async () => {

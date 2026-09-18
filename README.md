@@ -63,7 +63,16 @@ role names are preserved in structured officer and shareholder records. When
 the source prints them, individual officers and shareholders also include birth
 date, birthplace, birth-province code, citizenship, and residence address.
 Current secondary offices and local business units are returned in `localUnits`,
-in their printed order.
+in their printed order. When present, a local unit may also include its type,
+trade name, secondary activity, local ATECO code, ATECO classifications, activity
+declarations, and licences or authorisations. These filing and authorisation
+values preserve the printed source prose. Classification versions are included
+only when the source prints an explicit version heading. The local `atecoCode`
+is selected from the first `PRIMARIA` or `PREVALENTE` classification in source
+order, or the first unqualified classification; it is omitted for secondary-only
+classifications.
+See the [local-unit corpus findings](docs/local-unit-fields.md) for field coverage
+and layout constraints.
 See the [example output](exampleOutput.json) and
 [the schema](outputSchema.json).
 
